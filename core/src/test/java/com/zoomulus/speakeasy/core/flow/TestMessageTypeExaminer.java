@@ -1,0 +1,29 @@
+package com.zoomulus.speakeasy.core.flow;
+
+import com.zoomulus.speakeasy.core.message.Message;
+
+import lombok.Data;
+import lombok.experimental.Accessors;
+
+@Data
+@Accessors(fluent=true)
+public class TestMessageTypeExaminer implements Processor
+{
+    @Accessors(fluent=true, chain=false)
+    private Node node;
+    private int type;
+
+    @Override
+    public void handleMessage(Message message)
+    {
+        if (message instanceof TestMessage)
+        {
+            type = ((TestMessage) message).getType();
+        }
+    }
+
+    @Override
+    public void handleResponse(Message response)
+    {
+    }
+}
