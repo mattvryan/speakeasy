@@ -6,7 +6,7 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <groupId>com.zoomulus.speakeasy</groupId>
-  <artifactId>core</artifactId>
+  <artifactId>speakeasy-core</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>speakeasy-core</name>
   <description>SpeakEasy core infrastructure</description>
