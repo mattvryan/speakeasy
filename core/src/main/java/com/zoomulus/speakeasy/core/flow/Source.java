@@ -16,7 +16,7 @@ import com.zoomulus.speakeasy.core.message.Message;
  */
 @Data
 @Accessors(fluent=true)
-public class Source implements ReceivingNode
+public class Source implements ForwardingNode
 {
     private final String name = "source"; 
     private final Receiver receiver;

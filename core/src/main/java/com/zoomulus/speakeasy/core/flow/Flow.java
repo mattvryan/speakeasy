@@ -79,6 +79,10 @@ public class Flow
                 receiver.processMessage(message);
                 receiver.relay(message);
             }
+            else if (receiverName.equals(sink.name()))
+            {
+                sink.processMessage(message);
+            }
         }
     }
     
@@ -93,7 +97,7 @@ public class Flow
                 responder.processResponse(response);
                 responder.respond(response);
             }
-            else if (responderName.equals("sink"))
+            else if (responderName.equals(sink.name()))
             {
                 sink.processResponse(response);
             }

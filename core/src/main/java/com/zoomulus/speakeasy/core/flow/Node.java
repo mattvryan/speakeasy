@@ -20,7 +20,7 @@ import com.zoomulus.speakeasy.core.message.Message;
  */
 @Data
 @Accessors(fluent=true)
-public final class Node implements ReceivingNode, ReplyingNode
+public final class Node implements ForwardingNode, ReplyingNode
 {
     @Getter
     private final String name;    

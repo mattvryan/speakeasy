@@ -13,23 +13,29 @@ import com.zoomulus.speakeasy.core.message.Message;
  */
 @Data
 @Accessors(fluent=true)
-public class Sink
+public class Sink implements ReceivingNode
 {
     private final String name = "sink"; 
-    private final Replier replier;
+    private final Sender sender;
     @Setter(AccessLevel.PACKAGE)
     private Flow flow;
 
-    private Sink(final Replier replier)
+    private Sink(final Sender replier)
     {
-        this.replier = replier;
+        this.sender = replier;
     }
     
     public void processResponse(final Message response)
     {
-        replier.onReplyReceived(response);
+        sender.onReplyReceived(response);
     }
     
+    @Override
+    public void processMessage(Message message)
+    {
+        sender.onMessageRecevied(message);
+    }
+
     public static SinkBuilder builder()
     {
         return new SinkBuilder();
@@ -37,17 +43,17 @@ public class Sink
     
     public static class SinkBuilder
     {
-        private Replier replier;
+        private Sender sender;
         
-        public SinkBuilder responder(final Replier replier)
+        public SinkBuilder sender(final Sender sender)
         {
-            this.replier = replier;
+            this.sender = sender;
             return this;
         }
         
         public Sink build()
         {
-            return new Sink(replier);
+            return new Sink(sender);
         }
     }
 }

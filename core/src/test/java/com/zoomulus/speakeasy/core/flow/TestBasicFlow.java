@@ -11,7 +11,7 @@ public class TestBasicFlow
     public void testSendValidBufferGeneratesExpectedResponse()
     {
         Receiver receiver = new TestReceiver();
-        TestResponder responder = new TestResponder();
+        TestSender sender = new TestSender();
         TestMessageTypeExaminer typeExaminer = new TestMessageTypeExaminer();
         TestMessageBufferExaminer bufferExaminer = new TestMessageBufferExaminer();
         
@@ -20,7 +20,7 @@ public class TestBasicFlow
                 .sendsTo("typeExaminer")
                 .build();
         Sink sink = Sink.builder()
-                .responder(responder)
+                .sender(sender)
                 .build();
         Node typeExaminerNode = Node.builder()
                 .name("typeExaminer")
@@ -44,12 +44,49 @@ public class TestBasicFlow
         
         TestMessage message = new TestMessage("Test Message", 5);
         
-        assertNull(responder.response());
+        assertNull(sender.response());
         
         receiver.onMessageReceived(message);
         
-        assertEquals(message, responder.response());
+        assertEquals(message, sender.response());
         assertEquals(5, typeExaminer.type());
         assertEquals("Test Message", bufferExaminer.buffer());
+    }
+    
+    @Test
+    public void testProxyMode()
+    {
+        Receiver receiver = new TestReceiver();
+        TestSender sender = new TestSender();
+        TestMessageTypeExaminer typeExaminer = new TestMessageTypeExaminer();
+
+        Source source = Source.builder()
+                .receiver(receiver)
+                .sendsTo("typeExaminer")
+                .build();
+        Sink sink = Sink.builder()
+                .sender(sender)
+                .build();
+        Node typeExaminerNode = Node.builder()
+                .name("typeExaminer")
+                .processor(typeExaminer)
+                .sendsTo(sink.name())
+                .build();
+        
+        @SuppressWarnings("unused")
+        Flow flow = Flow.builder()
+            .source(source)
+            .sink(sink)
+            .node(typeExaminerNode)
+            .build();
+
+        TestMessage message = new TestMessage("Test Message", 5);
+        
+        assertNull(sender.response());
+        
+        receiver.onMessageReceived(message);
+        
+        assertEquals(message, sender.message());
+        assertEquals(5, typeExaminer.type());
     }
 }
