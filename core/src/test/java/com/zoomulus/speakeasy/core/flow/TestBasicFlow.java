@@ -11,38 +11,46 @@ public class TestBasicFlow
     @Test
     public void testSendValidBufferGeneratesExpectedResponse()
     {
+        Receiver receiver = new TestReceiver();
+        TestResponder responder = new TestResponder();
         TestMessageTypeExaminer typeExaminer = new TestMessageTypeExaminer();
         TestMessageBufferExaminer bufferExaminer = new TestMessageBufferExaminer();
         
-        TestListener source = new TestListener();
-        TestResponder sink = new TestResponder();
+        Source source = Source.builder()
+                .receiver(receiver)
+                .sendsTo("typeExaminer")
+                .build();
+        Sink sink = Sink.builder()
+                .responder(responder)
+                .build();
         Node typeExaminerNode = Node.builder()
                 .name("typeExaminer")
                 .processor(typeExaminer)
-                .succedent("bufferExaminer")
+                .sendsTo("bufferExaminer")
+                .repliesTo(sink.name())
                 .build();
         Node bufferExaminerNode = Node.builder()
                 .name("bufferExaminer")
                 .processor(bufferExaminer)
-                .precedent("typeExaminer")
+                .sendsTo(sink.name())
+                .repliesTo("typeExaminer")
                 .build();
         
         @SuppressWarnings("unused")
         Flow flow = Flow.builder()
             .source(source)
             .sink(sink)
-            .node(typeExaminerNode,
-                    (Flow.FlowBuilder.FIRST_RECEIVER | Flow.FlowBuilder.LAST_RESPONDER))
+            .node(typeExaminerNode)
             .node(bufferExaminerNode)
             .build();
         
         TestMessage message = new TestMessage("Test Message", 5);
         
-        assertNull(sink.response());
+        assertNull(responder.response());
         
-        source.processMessage(message);
+        receiver.onMessageReceived(message);
         
-        assertEquals(message, sink.response());
+        assertEquals(message, responder.response());
         assertEquals(5, typeExaminer.type());
         assertEquals("Test Message", bufferExaminer.buffer());
     }

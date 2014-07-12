@@ -20,23 +20,23 @@ import com.zoomulus.speakeasy.core.message.Message;
  */
 @Data
 @Accessors(fluent=true)
-public final class Node implements ReceivingNode, RespondingNode
+public final class Node implements ReceivingNode, ReplyingNode
 {
     @Getter
     private final String name;    
     private final Processor processor;
-    private final Optional<String> precedent;
-    private final Optional<String> succedent;
+    private final Optional<String> replyTarget;
+    private final Optional<String> sendTarget;
     
     Node(@NonNull final String name,
             @NonNull final Processor processor,
-            @NonNull final Optional<String> precedent,
-            @NonNull final Optional<String> succedent)
+            @NonNull final Optional<String> replyTarget,
+            @NonNull final Optional<String> sendTarget)
     {
         this.name = name;
         this.processor = processor;
-        this.precedent = precedent;
-        this.succedent = succedent;
+        this.replyTarget = replyTarget;
+        this.sendTarget = sendTarget;
         this.processor.node(this);
     }
     
@@ -44,14 +44,16 @@ public final class Node implements ReceivingNode, RespondingNode
     @Setter(AccessLevel.PROTECTED)
     private Flow flow;
     
-    public boolean hasPrecedent()
+    @Override
+    public boolean hasReplyTarget()
     {
-        return precedent.isPresent();
+        return replyTarget.isPresent();
     }
     
-    public boolean hasSuccedent()
+    @Override
+    public boolean hasSendTarget()
     {
-        return succedent.isPresent();
+        return sendTarget.isPresent();
     }
     
     protected void relay(@NonNull final Message message)
@@ -85,8 +87,8 @@ public final class Node implements ReceivingNode, RespondingNode
     {
         private String name;
         private Processor processor;
-        private Optional<String> precedent = Optional.<String> empty();
-        private Optional<String> succedent = Optional.<String> empty();
+        private Optional<String> replyTarget = Optional.<String> empty();
+        private Optional<String> sendTarget = Optional.<String> empty();
         
         public NodeBuilder name(@NonNull final String name)
         {
@@ -100,21 +102,21 @@ public final class Node implements ReceivingNode, RespondingNode
             return this;
         }
         
-        public NodeBuilder precedent(final String precedentNodeName)
+        public NodeBuilder repliesTo(final String replyTarget)
         {
-            precedent = Optional.ofNullable(precedentNodeName);
+            this.replyTarget = Optional.ofNullable(replyTarget);
             return this;
         }
         
-        public NodeBuilder succedent(final String succedentNodeName)
+        public NodeBuilder sendsTo(final String sendTarget)
         {
-            succedent = Optional.ofNullable(succedentNodeName);
+            this.sendTarget = Optional.ofNullable(sendTarget);
             return this;
         }
         
         public Node build()
         {
-            return new Node(name, processor, precedent, succedent);
+            return new Node(name, processor, replyTarget, sendTarget);
         }
     }
 }
