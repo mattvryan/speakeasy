@@ -7,7 +7,6 @@ import org.junit.Test;
 
 public class TestBasicFlow
 {
-
     @Test
     public void testSendValidBufferGeneratesExpectedResponse()
     {
@@ -32,7 +31,6 @@ public class TestBasicFlow
         Node bufferExaminerNode = Node.builder()
                 .name("bufferExaminer")
                 .processor(bufferExaminer)
-                .sendsTo(sink.name())
                 .repliesTo("typeExaminer")
                 .build();
         
