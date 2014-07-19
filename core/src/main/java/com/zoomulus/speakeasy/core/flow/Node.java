@@ -1,5 +1,6 @@
 package com.zoomulus.speakeasy.core.flow;
 
+import java.util.List;
 import java.util.Optional;
 
 import lombok.AccessLevel;
@@ -9,6 +10,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import com.google.common.collect.Lists;
 import com.zoomulus.speakeasy.core.message.Message;
 
 /**
@@ -20,24 +22,26 @@ import com.zoomulus.speakeasy.core.message.Message;
  */
 @Data
 @Accessors(fluent=true)
-public final class Node implements ForwardingNode, ReplyingNode
+public class Node implements ForwardingNode, ReplyingNode
 {
-    @Getter
     private final String name;    
-    private final Processor processor;
+    private final Optional<Processor> processor;
     private final Optional<String> replyTarget;
-    private final Optional<String> sendTarget;
+    private final List<String> sendTargets;
     
     Node(@NonNull final String name,
-            @NonNull final Processor processor,
+            @NonNull final Optional<Processor> processor,
             @NonNull final Optional<String> replyTarget,
-            @NonNull final Optional<String> sendTarget)
+            @NonNull final List<String> sendTargets)
     {
         this.name = name;
         this.processor = processor;
         this.replyTarget = replyTarget;
-        this.sendTarget = sendTarget;
-        this.processor.node(this);
+        this.sendTargets = sendTargets;
+        if (this.processor.isPresent())
+        {
+            this.processor.get().node(this);
+        }
     }
     
     @Getter(AccessLevel.PROTECTED)
@@ -48,12 +52,6 @@ public final class Node implements ForwardingNode, ReplyingNode
     public boolean hasReplyTarget()
     {
         return replyTarget.isPresent();
-    }
-    
-    @Override
-    public boolean hasSendTarget()
-    {
-        return sendTarget.isPresent();
     }
     
     protected void relay(@NonNull final Message message)
@@ -69,13 +67,19 @@ public final class Node implements ForwardingNode, ReplyingNode
     @Override
     public void processMessage(Message message)
     {
-        processor.handleMessage(message);
+        if (processor.isPresent())
+        {
+            processor.get().handleMessage(message);
+        }
     }
     
     @Override
     public void processResponse(Message response)
     {
-        processor.handleResponse(response);
+        if (processor.isPresent())
+        {
+            processor.get().handleResponse(response);
+        }
     }
     
     public static NodeBuilder builder()
@@ -86,9 +90,9 @@ public final class Node implements ForwardingNode, ReplyingNode
     public static class NodeBuilder
     {
         private String name;
-        private Processor processor;
+        private Optional<Processor> processor = Optional.<Processor> empty();
         private Optional<String> replyTarget = Optional.<String> empty();
-        private Optional<String> sendTarget = Optional.<String> empty();
+        private List<String> sendTargets = Lists.newArrayList();
         
         public NodeBuilder name(@NonNull final String name)
         {
@@ -98,25 +102,31 @@ public final class Node implements ForwardingNode, ReplyingNode
         
         public NodeBuilder processor(@NonNull final Processor processor)
         {
-            this.processor = processor;
+            this.processor = Optional.of(processor);
             return this;
         }
         
-        public NodeBuilder repliesTo(final String replyTarget)
+        public NodeBuilder repliesTo(@NonNull final String replyTarget)
         {
-            this.replyTarget = Optional.ofNullable(replyTarget);
+            this.replyTarget = Optional.of(replyTarget);
             return this;
         }
         
-        public NodeBuilder sendsTo(final String sendTarget)
+        public NodeBuilder sendsTo(@NonNull final String sendTarget)
         {
-            this.sendTarget = Optional.ofNullable(sendTarget);
+            sendTargets.add(sendTarget);
+            return this;
+        }
+        
+        public NodeBuilder sendsTo(@NonNull final List<String> sendTargets)
+        {
+            this.sendTargets.addAll(sendTargets);
             return this;
         }
         
         public Node build()
         {
-            return new Node(name, processor, replyTarget, sendTarget);
+            return new Node(name, processor, replyTarget, sendTargets);
         }
     }
 }

@@ -1,12 +1,13 @@
 package com.zoomulus.speakeasy.core.flow;
 
-import java.util.Optional;
+import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import com.google.common.collect.Lists;
 import com.zoomulus.speakeasy.core.message.Message;
 
 
@@ -20,7 +21,7 @@ public class Source implements ForwardingNode
 {
     private final String name = "source"; 
     private final Receiver receiver;
-    private final Optional<String> sendTarget;
+    private final List<String> sendTargets;
     @Setter(AccessLevel.PACKAGE)
     private Flow flow;
     
@@ -28,13 +29,7 @@ public class Source implements ForwardingNode
     {
         this.receiver = receiver;
         receiver.source(this);
-        this.sendTarget = Optional.of(downstreamNodeName);
-    }
-    
-    @Override
-    public boolean hasSendTarget()
-    {
-        return sendTarget.isPresent();
+        this.sendTargets = Lists.newArrayList(downstreamNodeName);
     }
     
     @Override

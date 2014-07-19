@@ -1,10 +1,10 @@
 package com.zoomulus.speakeasy.core.flow;
 
-import java.util.Optional;
+import java.util.List;
 
 public interface ForwardingNode extends ReceivingNode
 {
     String name();
-    boolean hasSendTarget();
-    Optional<String> sendTarget();
+//    boolean hasSendTarget();
+    List<String> sendTargets();
 }

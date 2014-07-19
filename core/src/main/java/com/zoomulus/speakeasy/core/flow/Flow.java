@@ -42,9 +42,9 @@ public class Flow
             @NonNull final List<Node> nodes)
     {
         source.flow(this);
-        if (source.hasSendTarget())
+        for (final String sendTarget : source.sendTargets())
         {
-            sendTargets.put(source.name(), source.sendTarget().get());
+            sendTargets.put(source.name(), sendTarget);
         }
         
         sink.flow(this);
@@ -54,9 +54,9 @@ public class Flow
             node.flow(this);
             this.nodes.put(node.name(), node);
             
-            if (node.hasSendTarget())
+            for (final String sendTarget : node.sendTargets())
             {
-                sendTargets.put(node.name(), node.sendTarget().get());
+                sendTargets.put(node.name(), sendTarget);
             }
             
             if (node.hasReplyTarget())
