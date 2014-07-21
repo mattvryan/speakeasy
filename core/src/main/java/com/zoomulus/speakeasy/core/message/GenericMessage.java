@@ -22,4 +22,10 @@ public class GenericMessage implements Message
     {
         return new GenericMessage(in);
     }
+
+    @Override
+    public String buffer()
+    {
+        return new String(buffer.array());
+    }
 }

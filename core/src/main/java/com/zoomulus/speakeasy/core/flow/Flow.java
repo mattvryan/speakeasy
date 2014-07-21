@@ -74,7 +74,10 @@ public class Flow
         for (final String receiverName : sendTargets.get(sourceName))
         {
             final Node receiver = nodes.get(receiverName);
-            if (null != receiver)
+            if (null != receiver &&
+                (! receiver.relayCondition().isPresent()
+                    || receiver.relayCondition().get().test(message))
+                )
             {
                 receiver.processMessage(message);
                 receiver.relay(message);

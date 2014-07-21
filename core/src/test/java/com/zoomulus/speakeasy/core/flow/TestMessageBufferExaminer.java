@@ -19,7 +19,7 @@ public class TestMessageBufferExaminer implements Processor
     {
         if (message instanceof TestMessage)
         {
-            buffer = ((TestMessage) message).getBuffer();
+            buffer = ((TestMessage) message).buffer();
         }
         node().respond(message);
     }

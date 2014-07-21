@@ -2,9 +2,6 @@ package com.zoomulus.speakeasy.core.flow;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 
 import org.junit.Test;
 
@@ -101,8 +98,8 @@ public class TestBasicFlow
     {
         Receiver receiver = new TestReceiver();
         TestSender sender = new TestSender();
-        TestMessageTypeExaminer leftNodeProcessor = new TestMessageTypeExaminer();
-        TestMessageTypeExaminer rightNodeProcessor = new TestMessageTypeExaminer();
+        TestMessageBufferExaminer leftNodeProcessor = new TestMessageBufferExaminer();
+        TestMessageBufferExaminer rightNodeProcessor = new TestMessageBufferExaminer();
         
         Source source = Source.builder()
                 .receiver(receiver)
@@ -143,13 +140,60 @@ public class TestBasicFlow
         receiver.onMessageReceived(message);
         
         assertEquals(message, sender.response());
-        assertEquals(5, leftNodeProcessor.type());
-        assertEquals(5, rightNodeProcessor.type());
+        assertEquals("Test Message", leftNodeProcessor.buffer());
+        assertEquals("Test Message", rightNodeProcessor.buffer());
     }
     
     @Test
     public void testFlowWithConditionalBranch()
     {
+        Receiver receiver = new TestReceiver();
+        TestSender sender = new TestSender();
+        TestMessageBufferExaminer leftNodeProcessor = new TestMessageBufferExaminer();
+        TestMessageBufferExaminer rightNodeProcessor = new TestMessageBufferExaminer();
         
+        Source source = Source.builder()
+                .receiver(receiver)
+                .sendsTo("branch")
+                .build();
+        Sink sink = Sink.builder()
+                .sender(sender)
+                .build();
+        Node branchingNode = Node.builder()
+                .name("branch")
+                .sendsTo(Lists.newArrayList("leftNode", "rightNode"))
+                .repliesTo(sink.name())
+                .build();
+        Node leftNode = Node.builder()
+                .name("leftNode")
+                .processor(leftNodeProcessor)
+                .relayCondition((Message m) -> m.buffer().equals("LEFT"))
+                .repliesTo("branch")
+                .build();
+        Node rightNode = Node.builder()
+                .name("rightNode")
+                .processor(rightNodeProcessor)
+                .relayCondition((Message m) -> m.buffer().equals("RIGHT"))
+                .repliesTo("branch")
+                .build();
+        
+        @SuppressWarnings("unused")
+        Flow flow = Flow.builder()
+            .source(source)
+            .sink(sink)
+            .node(branchingNode)
+            .node(leftNode)
+            .node(rightNode)
+            .build();        
+
+        TestMessage message = new TestMessage("LEFT", 5);
+        
+        assertNull(sender.response());
+        
+        receiver.onMessageReceived(message);
+        
+        assertEquals(message, sender.response());
+        assertEquals("LEFT", leftNodeProcessor.buffer());
+        assertNull(rightNodeProcessor.buffer());        
     }
 }

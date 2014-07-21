@@ -2,6 +2,7 @@ package com.zoomulus.speakeasy.core.flow;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import lombok.AccessLevel;
 import lombok.Data;
@@ -28,16 +29,20 @@ public class Node implements ForwardingNode, ReplyingNode
     private final Optional<Processor> processor;
     private final Optional<String> replyTarget;
     private final List<String> sendTargets;
+    private final Optional<Predicate<Message>> relayCondition;
     
     Node(@NonNull final String name,
             @NonNull final Optional<Processor> processor,
             @NonNull final Optional<String> replyTarget,
-            @NonNull final List<String> sendTargets)
+            @NonNull final List<String> sendTargets,
+            @NonNull final Optional<Predicate<Message>> relayCondition)
     {
         this.name = name;
         this.processor = processor;
         this.replyTarget = replyTarget;
         this.sendTargets = sendTargets;
+        this.relayCondition = relayCondition;
+
         if (this.processor.isPresent())
         {
             this.processor.get().node(this);
@@ -93,6 +98,7 @@ public class Node implements ForwardingNode, ReplyingNode
         private Optional<Processor> processor = Optional.<Processor> empty();
         private Optional<String> replyTarget = Optional.<String> empty();
         private List<String> sendTargets = Lists.newArrayList();
+        private Optional<Predicate<Message>> relayCondition = Optional.<Predicate<Message>> empty();
         
         public NodeBuilder name(@NonNull final String name)
         {
@@ -124,9 +130,15 @@ public class Node implements ForwardingNode, ReplyingNode
             return this;
         }
         
+        public NodeBuilder relayCondition(@NonNull final Predicate<Message> relayCondition)
+        {
+            this.relayCondition = Optional.of(relayCondition);
+            return this;
+        }
+        
         public Node build()
         {
-            return new Node(name, processor, replyTarget, sendTargets);
+            return new Node(name, processor, replyTarget, sendTargets, relayCondition);
         }
     }
 }
