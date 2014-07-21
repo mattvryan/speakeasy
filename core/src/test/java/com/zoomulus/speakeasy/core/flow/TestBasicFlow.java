@@ -3,6 +3,8 @@ package com.zoomulus.speakeasy.core.flow;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import java.nio.ByteBuffer;
+
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
@@ -151,6 +153,12 @@ public class TestBasicFlow
         TestSender sender = new TestSender();
         TestMessageBufferExaminer leftNodeProcessor = new TestMessageBufferExaminer();
         TestMessageBufferExaminer rightNodeProcessor = new TestMessageBufferExaminer();
+        ByteBuffer leftBuffer = ByteBuffer.allocate(4);
+        ByteBuffer rightBuffer = ByteBuffer.allocate(5);
+        leftBuffer.put("LEFT".getBytes());
+        rightBuffer.put("RIGHT".getBytes());
+        leftBuffer.rewind();
+        rightBuffer.rewind();
         
         Source source = Source.builder()
                 .receiver(receiver)
@@ -167,13 +175,13 @@ public class TestBasicFlow
         Node leftNode = Node.builder()
                 .name("leftNode")
                 .processor(leftNodeProcessor)
-                .relayCondition((Message m) -> m.buffer().equals("LEFT"))
+                .relayCondition((Message m) -> m.buffer().equals(leftBuffer))
                 .repliesTo("branch")
                 .build();
         Node rightNode = Node.builder()
                 .name("rightNode")
                 .processor(rightNodeProcessor)
-                .relayCondition((Message m) -> m.buffer().equals("RIGHT"))
+                .relayCondition((Message m) -> m.buffer().equals(rightBuffer))
                 .repliesTo("branch")
                 .build();
         
