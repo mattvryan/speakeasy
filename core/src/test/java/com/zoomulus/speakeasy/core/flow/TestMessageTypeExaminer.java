@@ -18,7 +18,7 @@ public class TestMessageTypeExaminer implements Processor
     {
         if (message instanceof TestMessage)
         {
-            type = ((TestMessage) message).getType();
+            type = ((TestMessage) message).type();
         }
     }
 

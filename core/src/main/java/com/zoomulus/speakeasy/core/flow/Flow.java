@@ -34,36 +34,36 @@ public class Flow
     final Source source;
     final Sink sink;
     final Map<String, Node> nodes = Maps.newHashMap();
-    final Multimap<String, String> receiveTargets = HashMultimap.create();
-    final Multimap<String, String> respondTargets = HashMultimap.create();
+    final Multimap<String, String> sendTargets = HashMultimap.create();
+    final Multimap<String, String> replyTargets = HashMultimap.create();
     
     Flow(@NonNull final Source source,
             @NonNull final Sink sink,
-            @NonNull final List<Node> nodes, 
-            @NonNull final Node firstReceiver,
-            @NonNull final Node lastResponder)
+            @NonNull final List<Node> nodes)
     {
         source.flow(this);
+        for (final String sendTarget : source.sendTargets())
+        {
+            sendTargets.put(source.name(), sendTarget);
+        }
+        
         sink.flow(this);
+        
         for (Node node : nodes)
         {
             node.flow(this);
             this.nodes.put(node.name(), node);
             
-            if (node.hasSuccedent())
+            for (final String sendTarget : node.sendTargets())
             {
-                receiveTargets.put(node.name(), node.succedent().get());
+                sendTargets.put(node.name(), sendTarget);
             }
             
-            if (node.hasPrecedent())
+            if (node.hasReplyTarget())
             {
-                respondTargets.put(node.name(), node.precedent().get());
+                replyTargets.put(node.name(), node.replyTarget().get());
             }
-            
-            
         }
-        receiveTargets.put("source", firstReceiver.name());
-        respondTargets.put(lastResponder.name(), "sink");
         this.source = source;
         this.sink = sink;
     }
@@ -71,13 +71,20 @@ public class Flow
     public void relay(@NonNull final Message message,
             @NonNull final String sourceName)
     {
-        for (final String receiverName : receiveTargets.get(sourceName))
+        for (final String receiverName : sendTargets.get(sourceName))
         {
             final Node receiver = nodes.get(receiverName);
-            if (null != receiver)
+            if (null != receiver &&
+                (! receiver.relayCondition().isPresent()
+                    || receiver.relayCondition().get().test(message))
+                )
             {
                 receiver.processMessage(message);
                 receiver.relay(message);
+            }
+            else if (receiverName.equals(sink.name()))
+            {
+                sink.processMessage(message);
             }
         }
     }
@@ -85,7 +92,7 @@ public class Flow
     public void respond(@NonNull final Message response,
             @NonNull final String sourceName)
     {
-        for (final String responderName : respondTargets.get(sourceName))
+        for (final String responderName : replyTargets.get(sourceName))
         {
             final Node responder = nodes.get(responderName);
             if (null != responder)
@@ -93,7 +100,7 @@ public class Flow
                 responder.processResponse(response);
                 responder.respond(response);
             }
-            else if (responderName.equals("sink"))
+            else if (responderName.equals(sink.name()))
             {
                 sink.processResponse(response);
             }
@@ -110,12 +117,7 @@ public class Flow
         Source source;
         Sink sink;
         List<Node> nodes = Lists.newArrayList();
-        Node firstReceiver;
-        Node lastResponder;
 
-        public static final int FIRST_RECEIVER = 1;
-        public static final int LAST_RESPONDER = 2;
-        
         public FlowBuilder source(@NonNull final Source source)
         {
             this.source = source;
@@ -136,20 +138,12 @@ public class Flow
         public FlowBuilder node(@NonNull final Node node, int position)
         {
             nodes.add(node);
-            if ((position & FIRST_RECEIVER) != 0)
-            {
-                firstReceiver = node;
-            }
-            if ((position & LAST_RESPONDER) != 0)
-            {
-                lastResponder = node;
-            }
             return this;
         }
         
         public Flow build()
         {
-            return new Flow(source, sink, nodes, firstReceiver, lastResponder);
+            return new Flow(source, sink, nodes);
         }
     }
 }

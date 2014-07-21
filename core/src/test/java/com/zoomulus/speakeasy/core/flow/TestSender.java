@@ -7,14 +7,20 @@ import com.zoomulus.speakeasy.core.message.Message;
 
 @Getter
 @Accessors(fluent=true)
-public class TestResponder extends Sink
+public class TestSender implements Sender
 {
-    private final String name = "sink";
     private Message response;
+    private Message message;
 
     @Override
-    public void processResponse(Message response)
+    public void onReplyReceived(Message response)
     {
         this.response = response;
+    }
+
+    @Override
+    public void onMessageRecevied(Message message)
+    {
+        this.message = message;
     }
 }

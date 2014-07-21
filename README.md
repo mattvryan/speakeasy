@@ -1,6 +1,6 @@
 #SpeakEasy
 
-SpeakEasy is a collection of communication libraries.  SpeakEasy includes:
+SpeakEasy is a collection of communication libraries for facilitating real-time internet communications - audio, video, chat, etc.  SpeakEasy includes:
 
 * A number of protocol stacks with a consistent metaphor
 * Infrastructure to implement the protocol stacks

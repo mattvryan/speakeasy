@@ -1,6 +1,8 @@
 package com.zoomulus.speakeasy.core.flow;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import lombok.AccessLevel;
 import lombok.Data;
@@ -9,6 +11,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import com.google.common.collect.Lists;
 import com.zoomulus.speakeasy.core.message.Message;
 
 /**
@@ -20,38 +23,40 @@ import com.zoomulus.speakeasy.core.message.Message;
  */
 @Data
 @Accessors(fluent=true)
-public final class Node implements ReceivingNode, RespondingNode
+public class Node implements ForwardingNode, ReplyingNode
 {
-    @Getter
     private final String name;    
-    private final Processor processor;
-    private final Optional<String> precedent;
-    private final Optional<String> succedent;
+    private final Optional<Processor> processor;
+    private final Optional<String> replyTarget;
+    private final List<String> sendTargets;
+    private final Optional<Predicate<Message>> relayCondition;
     
     Node(@NonNull final String name,
-            @NonNull final Processor processor,
-            @NonNull final Optional<String> precedent,
-            @NonNull final Optional<String> succedent)
+            @NonNull final Optional<Processor> processor,
+            @NonNull final Optional<String> replyTarget,
+            @NonNull final List<String> sendTargets,
+            @NonNull final Optional<Predicate<Message>> relayCondition)
     {
         this.name = name;
         this.processor = processor;
-        this.precedent = precedent;
-        this.succedent = succedent;
-        this.processor.node(this);
+        this.replyTarget = replyTarget;
+        this.sendTargets = sendTargets;
+        this.relayCondition = relayCondition;
+
+        if (this.processor.isPresent())
+        {
+            this.processor.get().node(this);
+        }
     }
     
     @Getter(AccessLevel.PROTECTED)
     @Setter(AccessLevel.PROTECTED)
     private Flow flow;
     
-    public boolean hasPrecedent()
+    @Override
+    public boolean hasReplyTarget()
     {
-        return precedent.isPresent();
-    }
-    
-    public boolean hasSuccedent()
-    {
-        return succedent.isPresent();
+        return replyTarget.isPresent();
     }
     
     protected void relay(@NonNull final Message message)
@@ -67,13 +72,19 @@ public final class Node implements ReceivingNode, RespondingNode
     @Override
     public void processMessage(Message message)
     {
-        processor.handleMessage(message);
+        if (processor.isPresent())
+        {
+            processor.get().handleMessage(message);
+        }
     }
     
     @Override
     public void processResponse(Message response)
     {
-        processor.handleResponse(response);
+        if (processor.isPresent())
+        {
+            processor.get().handleResponse(response);
+        }
     }
     
     public static NodeBuilder builder()
@@ -84,9 +95,10 @@ public final class Node implements ReceivingNode, RespondingNode
     public static class NodeBuilder
     {
         private String name;
-        private Processor processor;
-        private Optional<String> precedent = Optional.<String> empty();
-        private Optional<String> succedent = Optional.<String> empty();
+        private Optional<Processor> processor = Optional.<Processor> empty();
+        private Optional<String> replyTarget = Optional.<String> empty();
+        private List<String> sendTargets = Lists.newArrayList();
+        private Optional<Predicate<Message>> relayCondition = Optional.<Predicate<Message>> empty();
         
         public NodeBuilder name(@NonNull final String name)
         {
@@ -96,25 +108,37 @@ public final class Node implements ReceivingNode, RespondingNode
         
         public NodeBuilder processor(@NonNull final Processor processor)
         {
-            this.processor = processor;
+            this.processor = Optional.of(processor);
             return this;
         }
         
-        public NodeBuilder precedent(final String precedentNodeName)
+        public NodeBuilder repliesTo(@NonNull final String replyTarget)
         {
-            precedent = Optional.ofNullable(precedentNodeName);
+            this.replyTarget = Optional.of(replyTarget);
             return this;
         }
         
-        public NodeBuilder succedent(final String succedentNodeName)
+        public NodeBuilder sendsTo(@NonNull final String sendTarget)
         {
-            succedent = Optional.ofNullable(succedentNodeName);
+            sendTargets.add(sendTarget);
+            return this;
+        }
+        
+        public NodeBuilder sendsTo(@NonNull final List<String> sendTargets)
+        {
+            this.sendTargets.addAll(sendTargets);
+            return this;
+        }
+        
+        public NodeBuilder relayCondition(@NonNull final Predicate<Message> relayCondition)
+        {
+            this.relayCondition = Optional.of(relayCondition);
             return this;
         }
         
         public Node build()
         {
-            return new Node(name, processor, precedent, succedent);
+            return new Node(name, processor, replyTarget, sendTargets, relayCondition);
         }
     }
 }
