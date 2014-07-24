@@ -1,4 +1,4 @@
-package com.zoomulus.speakeasy.core.util;
+package com.zoomulus.speakeasy.core.types;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;

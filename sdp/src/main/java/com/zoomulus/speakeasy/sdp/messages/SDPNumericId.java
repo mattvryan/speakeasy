@@ -5,7 +5,7 @@ import java.time.Instant;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 
-import com.zoomulus.speakeasy.core.util.NumericString;
+import com.zoomulus.speakeasy.core.types.NumericString;
 
 @EqualsAndHashCode(callSuper=true)
 public class SDPNumericId extends NumericString

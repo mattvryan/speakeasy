@@ -1,6 +1,6 @@
 package com.zoomulus.speakeasy.sdp.messages;
 
-import com.zoomulus.speakeasy.core.util.Word;
+import com.zoomulus.speakeasy.core.types.Word;
 
 import lombok.EqualsAndHashCode;
 

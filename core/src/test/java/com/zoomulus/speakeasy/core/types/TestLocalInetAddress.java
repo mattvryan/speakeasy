@@ -1,12 +1,12 @@
-package com.zoomulus.speakeasy.sdp.messages;
+package com.zoomulus.speakeasy.core.types;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.zoomulus.speakeasy.core.util.AddrType;
-import com.zoomulus.speakeasy.core.util.LocalInetAddress;
+import com.zoomulus.speakeasy.core.types.AddrType;
+import com.zoomulus.speakeasy.core.types.LocalInetAddress;
 
 public class TestLocalInetAddress
 {
