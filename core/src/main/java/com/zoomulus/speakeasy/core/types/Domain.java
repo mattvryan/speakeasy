@@ -6,11 +6,11 @@ import lombok.NonNull;
 @EqualsAndHashCode
 public class Domain
 {
-    private final AlphabeticString name;
-    private final AlphabeticString tld;
+    private final Word name;
+    private final Word tld;
     private String srep = null;
     
-    public Domain(@NonNull final AlphabeticString name, @NonNull final AlphabeticString tld)
+    public Domain(@NonNull final Word name, @NonNull final Word tld)
     {
         this.name = name;
         this.tld = tld;
@@ -21,8 +21,8 @@ public class Domain
         String[] parts = srep.split("\\.");
         if (2 == parts.length)
         {
-            name = new AlphabeticString(parts[0]);
-            tld = new AlphabeticString(parts[1]);
+            name = new Word(parts[0]);
+            tld = new Word(parts[1]);
         }
         else
         {

@@ -12,7 +12,7 @@ public class TestDomain
     @Test
     public void testConstructWithParts()
     {
-        Domain d = new Domain(new AlphabeticString("zoomulus"), new AlphabeticString("com"));
+        Domain d = new Domain(new Word("zoomulus"), new Word("com"));
         assertEquals("zoomulus.com", d.toString());
     }
     
@@ -38,7 +38,6 @@ public class TestDomain
                 .add("too.many.dots")
                 .add("domain with.spaces")
                 .add("tld.with spaces")
-                .add("num3r1c.d0ma1n")
                 .add("")
                 .build();
         for (String invalidDomain : invalidDomains)
@@ -56,7 +55,7 @@ public class TestDomain
     @Test
     public void testEquals()
     {
-        Domain d1 = new Domain(new AlphabeticString("zoomulus"), new AlphabeticString("com"));
+        Domain d1 = new Domain(new Word("zoomulus"), new Word("com"));
         Domain d2 = new Domain("zoomulus.com");
         assertEquals(d1, d2);
     }
