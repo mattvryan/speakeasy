@@ -1,15 +1,18 @@
 package com.zoomulus.speakeasy.sdp.messages;
 
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
-
-import com.zoomulus.speakeasy.core.util.AddrType;
-import com.zoomulus.speakeasy.core.util.LocalInetAddress;
-import com.zoomulus.speakeasy.core.util.NetType;
+import java.net.UnknownHostException;
+import java.util.Optional;
 
 import lombok.NonNull;
 import lombok.Value;
 import lombok.experimental.Accessors;
+
+import com.zoomulus.speakeasy.core.util.AddrType;
+import com.zoomulus.speakeasy.core.util.LocalInetAddress;
+import com.zoomulus.speakeasy.core.util.NetType;
 
 @Value
 @Accessors(fluent=true)
@@ -380,5 +383,107 @@ public class SDPOrigin
                 netType,
                 addrType,
                 unicastAddress.getCanonicalHostName());
+    }
+    
+    public static Optional<SDPOrigin> fromString(@NonNull final String stringRep)
+    {
+        String[] parts = stringRep.trim().split(" +");
+        if (parts.length >= 6)
+        {
+            SDPUsername username = null;
+            SDPNumericId sessId = null;
+            SDPNumericId sessVersion = null;
+            NetType netType = null;
+            AddrType addrType = null;
+            InetAddress unicastAddress = null;
+            
+            int ctr = 1;
+            
+            for (String part : parts)
+            {
+                String tPart = part.trim();
+                if (0 != tPart.length())
+                {
+                    switch (ctr)
+                    {
+                        case 1:
+                            username = new SDPUsername(tPart);
+                            break;
+                        case 2:
+                            try
+                            {
+                                sessId = new SDPNumericId(tPart);
+                            }
+                            catch (NumberFormatException e)
+                            {
+                                e.printStackTrace();
+                            }
+                            break;
+                        case 3:
+                            try
+                            {
+                                sessVersion = new SDPNumericId(tPart);
+                            }
+                            catch (NumberFormatException e)
+                            {
+                                e.printStackTrace();
+                            }
+                            break;
+                        case 4:
+                            try
+                            {
+                                netType = NetType.valueOf(tPart);
+                            }
+                            catch (IllegalArgumentException e)
+                            {
+                                e.printStackTrace();
+                            }
+                            break;
+                        case 5:
+                            try
+                            {
+                                addrType = AddrType.valueOf(tPart);
+                            }
+                            catch (IllegalArgumentException e)
+                            {
+                                e.printStackTrace();
+                            }
+                            break;
+                        case 6:
+                            try
+                            {
+                                unicastAddress = InetAddress.getByName(tPart);
+                            }
+                            catch (UnknownHostException e)
+                            {
+                                e.printStackTrace();
+                            }
+                            break;
+                    }
+                }
+                if (++ctr > 6) break;
+            }
+            if (NetType.IN == netType)
+            {
+                if (((AddrType.IP4 == addrType) && (unicastAddress instanceof Inet4Address)) ||
+                        ((AddrType.IP6 == addrType) && (unicastAddress instanceof Inet6Address)))
+                {
+                    try
+                    {
+                        return Optional.of(new SDPOrigin(username, sessId, sessVersion, addrType, unicastAddress));
+                    }
+                    catch (NullPointerException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+                else
+                {
+                    new IllegalArgumentException("Unicast address type does not match provided AddrType")
+                    .printStackTrace();
+                }
+            }
+        }
+        return Optional.<SDPOrigin> empty();
     }
 }
