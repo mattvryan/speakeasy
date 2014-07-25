@@ -24,6 +24,13 @@ public class TestEmailAddress
     }
     
     @Test
+    public void testConstructByPartsWithName()
+    {
+        EmailAddress ea = new EmailAddress(new Word("test"), new Domain("zoomulus.com"), "Test");
+        assertEquals("test@zoomulus.com (Test)", ea.toString());
+    }
+    
+    @Test
     public void testParseString()
     {
         EmailAddress ea = EmailAddress.parseString("test@zoomulus.com");
