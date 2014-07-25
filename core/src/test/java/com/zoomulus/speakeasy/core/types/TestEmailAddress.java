@@ -31,6 +31,20 @@ public class TestEmailAddress
     }
     
     @Test
+    public void testConstructWithStringIncludingTrailingName()
+    {
+        EmailAddress ea = new EmailAddress("test@zoomulus.com (Test User)");
+        assertEquals("test@zoomulus.com (Test User)", ea.toString());
+    }
+    
+    @Test
+    public void testConstructWithStringIncludingLeadingname()
+    {
+        EmailAddress ea = new EmailAddress("Test User <test@zoomulus.com>");
+        assertEquals("Test User <test@zoomulus.com>", ea.toString());
+    }
+    
+    @Test
     public void testParseString()
     {
         EmailAddress ea = EmailAddress.parseString("test@zoomulus.com");

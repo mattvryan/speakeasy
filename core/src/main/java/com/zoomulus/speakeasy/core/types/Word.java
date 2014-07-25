@@ -22,7 +22,7 @@ public class Word
         }
         else if (word.contains(" "))
         {
-            throw new IllegalArgumentException("Usernames cannot contain spaces");
+            throw new IllegalArgumentException("Words cannot contain spaces");
         }
         this.word = word;
     }
