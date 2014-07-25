@@ -10,9 +10,9 @@ import lombok.NonNull;
 import lombok.Value;
 import lombok.experimental.Accessors;
 
-import com.zoomulus.speakeasy.core.util.AddrType;
-import com.zoomulus.speakeasy.core.util.LocalInetAddress;
-import com.zoomulus.speakeasy.core.util.NetType;
+import com.zoomulus.speakeasy.core.types.AddrType;
+import com.zoomulus.speakeasy.core.types.LocalInetAddress;
+import com.zoomulus.speakeasy.core.types.NetType;
 
 @Value
 @Accessors(fluent=true)

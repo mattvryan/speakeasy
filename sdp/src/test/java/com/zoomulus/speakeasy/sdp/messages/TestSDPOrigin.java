@@ -14,9 +14,9 @@ import java.util.Optional;
 
 import org.junit.Test;
 
-import com.zoomulus.speakeasy.core.util.AddrType;
-import com.zoomulus.speakeasy.core.util.LocalInetAddress;
-import com.zoomulus.speakeasy.core.util.NetType;
+import com.zoomulus.speakeasy.core.types.AddrType;
+import com.zoomulus.speakeasy.core.types.LocalInetAddress;
+import com.zoomulus.speakeasy.core.types.NetType;
 
 public class TestSDPOrigin
 {
