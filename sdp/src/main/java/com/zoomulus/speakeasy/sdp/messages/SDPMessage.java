@@ -7,8 +7,8 @@ import java.util.Optional;
 import lombok.Value;
 import lombok.experimental.Accessors;
 
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.zoomulus.speakeasy.core.message.Message;
-import com.zoomulus.speakeasy.core.types.E164PhoneNumber;
 import com.zoomulus.speakeasy.core.types.EmailAddress;
 
 @Value
@@ -22,7 +22,7 @@ public class SDPMessage implements Message
     final Optional<String> sessionInformation;
     final Optional<URI> uri;
     final Optional<EmailAddress> emailAddress;
-    final Optional<E164PhoneNumber> phoneNumber;
+    final Optional<PhoneNumber> phoneNumber;
     
     @Override
     public ByteBuffer buffer()
@@ -38,7 +38,7 @@ public class SDPMessage implements Message
         sessionInformation = Optional.<String> empty();
         uri = Optional.<URI> empty();
         emailAddress = Optional.<EmailAddress> empty();
-        phoneNumber = Optional.<E164PhoneNumber> empty();
+        phoneNumber = Optional.<PhoneNumber> empty();
     }    
 
     public static SDPMessageBuilder builder()
