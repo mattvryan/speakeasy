@@ -23,6 +23,7 @@ public class SDPMessage implements Message
     final Optional<URI> uri;
     final Optional<EmailAddress> emailAddress;
     final Optional<PhoneNumber> phoneNumber;
+    final Optional<SDPConnectionData> connectionData;
     
     @Override
     public ByteBuffer buffer()
@@ -39,6 +40,7 @@ public class SDPMessage implements Message
         uri = Optional.<URI> empty();
         emailAddress = Optional.<EmailAddress> empty();
         phoneNumber = Optional.<PhoneNumber> empty();
+        connectionData = Optional.<SDPConnectionData> empty();
     }    
 
     public static SDPMessageBuilder builder()
