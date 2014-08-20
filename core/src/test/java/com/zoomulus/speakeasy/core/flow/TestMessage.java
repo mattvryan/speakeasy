@@ -12,6 +12,7 @@ import com.zoomulus.speakeasy.core.message.Message;
 public class TestMessage implements Message
 {
     final ByteBuffer buffer;
+    final String contentType="text/plain";
     final int type;
     
     public TestMessage(final String contents, final int type)
