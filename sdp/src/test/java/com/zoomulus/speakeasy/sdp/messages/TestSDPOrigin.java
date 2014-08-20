@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -49,7 +48,7 @@ public class TestSDPOrigin
     @Test
     public void testDefaultSDPOriginToString()
     {
-        String expected = String.format("%s %s %s %s %s %s",
+        final String expected = String.format("%s %s %s %s %s %s",
                 emptyUsername,
                 sessId,
                 sessVersion,
@@ -62,7 +61,7 @@ public class TestSDPOrigin
     @Test
     public void testCustomSDPOriginToString()
     {
-        String expected = String.format("%s %s %s %s %s %s",
+        final String expected = String.format("%s %s %s %s %s %s",
                 bobUsername,
                 sessId,
                 sessVersion,
@@ -75,7 +74,7 @@ public class TestSDPOrigin
     @Test
     public void testParseDefaultString() throws UnknownHostException
     {
-        Optional<SDPOrigin> origin = SDPOrigin.fromString("- 12345 23456 IN IP4 100.101.102.103");
+        final Optional<SDPOrigin> origin = SDPOrigin.fromString("- 12345 23456 IN IP4 100.101.102.103");
         assertTrue(origin.isPresent());
         assertEquals(new SDPNumericId("12345"), origin.get().sessId());
         assertEquals(new SDPNumericId("23456"), origin.get().sessVersion());
@@ -89,7 +88,7 @@ public class TestSDPOrigin
     @Test
     public void testParseCustomString() throws UnknownHostException
     {
-        Optional<SDPOrigin> origin = SDPOrigin.fromString("bob 12345 23456 IN IP4 100.101.102.103");
+        final Optional<SDPOrigin> origin = SDPOrigin.fromString("bob 12345 23456 IN IP4 100.101.102.103");
         assertTrue(origin.isPresent());
         assertEquals(new SDPNumericId("12345"), origin.get().sessId());
         assertEquals(new SDPNumericId("23456"), origin.get().sessVersion());
@@ -102,7 +101,7 @@ public class TestSDPOrigin
     @Test
     public void testParseIP6Addr() throws UnknownHostException
     {
-        Optional<SDPOrigin> origin = SDPOrigin.fromString("bob 12345 23456 IN IP6 fe80::3e07:54ff:fe46:8e6a");
+        final Optional<SDPOrigin> origin = SDPOrigin.fromString("bob 12345 23456 IN IP6 fe80::3e07:54ff:fe46:8e6a");
         assertTrue(origin.isPresent());
         assertEquals(new SDPNumericId("12345"), origin.get().sessId());
         assertEquals(new SDPNumericId("23456"), origin.get().sessVersion());
@@ -115,7 +114,7 @@ public class TestSDPOrigin
     @Test
     public void testOriginWithDNSWorks() throws UnknownHostException
     {
-        Optional<SDPOrigin> origin = SDPOrigin.fromString("bob 12345 23456 IN IP4 www.jive.com");
+        final Optional<SDPOrigin> origin = SDPOrigin.fromString("bob 12345 23456 IN IP4 www.jive.com");
         assertTrue(origin.isPresent());
         assertEquals(new SDPNumericId("12345"), origin.get().sessId());
         assertEquals(new SDPNumericId("23456"), origin.get().sessVersion());
@@ -134,7 +133,7 @@ public class TestSDPOrigin
     @Test
     public void testParseIrregularlyFormattedString() throws UnknownHostException
     {
-        Optional<SDPOrigin> origin = SDPOrigin.fromString(" bob  12345 23456      IN   IP4  100.101.102.103             ");
+        final Optional<SDPOrigin> origin = SDPOrigin.fromString(" bob  12345 23456      IN   IP4  100.101.102.103             ");
         assertTrue(origin.isPresent());
         assertEquals(new SDPNumericId("12345"), origin.get().sessId());
         assertEquals(new SDPNumericId("23456"), origin.get().sessVersion());
@@ -171,7 +170,7 @@ public class TestSDPOrigin
     @Test
     public void testInvalidInetAddrThrowsUnknownHostException()
     {
-        Optional<SDPOrigin> origin = SDPOrigin.fromString("bob 12345 23456 IN IP6 100.200.300.400");
+        final Optional<SDPOrigin> origin = SDPOrigin.fromString("bob 12345 23456 IN IP6 100.200.300.400");
         assertFalse(SDPOrigin.fromString("bob 12345 23456 IN IP6 100.200.300.400").isPresent());
     }
 
