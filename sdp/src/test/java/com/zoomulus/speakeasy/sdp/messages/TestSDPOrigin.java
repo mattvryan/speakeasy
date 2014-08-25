@@ -170,7 +170,6 @@ public class TestSDPOrigin
     @Test
     public void testInvalidInetAddrThrowsUnknownHostException()
     {
-        final Optional<SDPOrigin> origin = SDPOrigin.fromString("bob 12345 23456 IN IP6 100.200.300.400");
         assertFalse(SDPOrigin.fromString("bob 12345 23456 IN IP6 100.200.300.400").isPresent());
     }
 
