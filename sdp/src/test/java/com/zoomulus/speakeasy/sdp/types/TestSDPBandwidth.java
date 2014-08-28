@@ -1,4 +1,4 @@
-package com.zoomulus.speakeasy.sdp.messages;
+package com.zoomulus.speakeasy.sdp.types;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -7,7 +7,8 @@ import java.util.Optional;
 
 import org.junit.Test;
 
-import com.zoomulus.speakeasy.sdp.messages.SDPBandwidth.SDPBandwidthType;
+import com.zoomulus.speakeasy.sdp.types.SDPBandwidth;
+import com.zoomulus.speakeasy.sdp.types.SDPBandwidth.SDPBandwidthType;
 
 public class TestSDPBandwidth
 {

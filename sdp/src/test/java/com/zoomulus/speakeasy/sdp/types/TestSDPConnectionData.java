@@ -1,4 +1,4 @@
-package com.zoomulus.speakeasy.sdp.messages;
+package com.zoomulus.speakeasy.sdp.types;
 
 import static org.junit.Assert.*;
 
@@ -14,6 +14,7 @@ import org.junit.Test;
 import com.zoomulus.speakeasy.core.types.AddrType;
 import com.zoomulus.speakeasy.core.types.LocalInetAddress;
 import com.zoomulus.speakeasy.core.types.NetType;
+import com.zoomulus.speakeasy.sdp.types.SDPConnectionData;
 
 public class TestSDPConnectionData
 {

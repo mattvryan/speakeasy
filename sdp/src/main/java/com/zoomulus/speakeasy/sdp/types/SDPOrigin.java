@@ -1,4 +1,4 @@
-package com.zoomulus.speakeasy.sdp.messages;
+package com.zoomulus.speakeasy.sdp.types;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;

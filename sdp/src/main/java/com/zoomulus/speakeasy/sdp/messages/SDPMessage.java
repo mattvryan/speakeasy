@@ -10,6 +10,10 @@ import lombok.experimental.Accessors;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.zoomulus.speakeasy.core.message.Message;
 import com.zoomulus.speakeasy.core.types.EmailAddress;
+import com.zoomulus.speakeasy.sdp.types.SDPBandwidth;
+import com.zoomulus.speakeasy.sdp.types.SDPConnectionData;
+import com.zoomulus.speakeasy.sdp.types.SDPOrigin;
+import com.zoomulus.speakeasy.sdp.types.SDPTimePeriod;
 
 /**
  * An implementation of RFC 4566.
@@ -29,6 +33,7 @@ public class SDPMessage implements Message
     final Optional<PhoneNumber> phoneNumber;
     final Optional<SDPConnectionData> connectionData;
     final Optional<SDPBandwidth> bandwidth;
+    final SDPTimePeriod timing;
 
     @Override
     public ByteBuffer buffer()
@@ -47,6 +52,7 @@ public class SDPMessage implements Message
         phoneNumber = Optional.<PhoneNumber> empty();
         connectionData = Optional.<SDPConnectionData> empty();
         bandwidth = Optional.<SDPBandwidth> empty();
+        timing = new SDPTimePeriod();
     }
 
     public static SDPMessageBuilder builder()

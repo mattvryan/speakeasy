@@ -1,4 +1,4 @@
-package com.zoomulus.speakeasy.sdp.messages;
+package com.zoomulus.speakeasy.sdp.types;
 
 import com.zoomulus.speakeasy.core.types.Word;
 

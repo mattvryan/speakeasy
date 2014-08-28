@@ -1,4 +1,4 @@
-package com.zoomulus.speakeasy.sdp.messages;
+package com.zoomulus.speakeasy.sdp.types;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -16,6 +16,9 @@ import org.junit.Test;
 import com.zoomulus.speakeasy.core.types.AddrType;
 import com.zoomulus.speakeasy.core.types.LocalInetAddress;
 import com.zoomulus.speakeasy.core.types.NetType;
+import com.zoomulus.speakeasy.sdp.types.SDPNumericId;
+import com.zoomulus.speakeasy.sdp.types.SDPOrigin;
+import com.zoomulus.speakeasy.sdp.types.SDPUsername;
 
 public class TestSDPOrigin
 {
