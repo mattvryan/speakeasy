@@ -1,45 +1,21 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.zoomulus.speakeasy</groupId>
-  <artifactId>speakeasy</artifactId>
+  <parent>
+    <groupId>com.zoomulus</groupId>
+    <artifactId>zoomulus-parent</artifactId>
+    <version>1.0.1</version>
+  </parent>
+  <groupId>com.zoomulus</groupId>
+  <artifactId>speakeasy-parent</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>speakeasy</name>
   <description>SpeakEasy is a collection of protocol stacks implemented with a consistent-feeling metaphor.</description>
   
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+  <scm>
+    <connection>scm:git:git@github.com:zoomulus/speakeasy.git</connection>
+    <developerConnection>scm:git:git@github.com:zoomulus/speakeasy.git</developerConnection>
+    <url>git@github.com:zoomulus/speakeasy.git</url>
+  </scm>
   
-  <dependencies>
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>1.12.6</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.7.7</version>
-    </dependency>
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>1.1.2</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>17.0</version>
-    </dependency>
-  </dependencies>
 </project>
