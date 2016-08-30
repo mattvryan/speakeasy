@@ -4,10 +4,19 @@
     <groupId>com.zoomulus</groupId>
     <artifactId>speakeasy-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <relativePath>../speakeasy</relativePath>
   </parent>
   <groupId>com.zoomulus</groupId>
   <artifactId>speakeasy-core</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>speakeasy-core</name>
   <description>SpeakEasy core infrastructure</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+      <version>2.9.4</version>
+    </dependency>
+  </dependencies>
 </project>

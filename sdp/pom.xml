@@ -4,6 +4,7 @@
     <groupId>com.zoomulus</groupId>
     <artifactId>speakeasy-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <relativePath>../speakeasy</relativePath>
   </parent>
   <groupId>com.zoomulus</groupId>
   <artifactId>speakeasy-sdp</artifactId>
@@ -12,6 +13,11 @@
   <description>SpeakEasy SDP parser</description>
   
   <dependencies>
+    <dependency>
+      <groupId>com.zoomulus</groupId>
+      <artifactId>speakeasy-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 	<dependency>
 		<groupId>com.googlecode.libphonenumber</groupId>
 		<artifactId>libphonenumber</artifactId>
