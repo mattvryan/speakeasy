@@ -1,5 +1,7 @@
 package com.zoomulus.speakeasy.sdp.messages;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Optional;
@@ -7,9 +9,13 @@ import java.util.Optional;
 import lombok.Value;
 import lombok.experimental.Accessors;
 
+import com.google.common.base.Strings;
+import com.google.common.net.MediaType;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.zoomulus.speakeasy.core.message.Message;
 import com.zoomulus.speakeasy.core.types.EmailAddress;
+import com.zoomulus.speakeasy.sdp.messages.exceptions.SDPMessageException;
+import com.zoomulus.speakeasy.sdp.messages.exceptions.SDPParseException;
 import com.zoomulus.speakeasy.sdp.types.SDPBandwidth;
 import com.zoomulus.speakeasy.sdp.types.SDPConnectionData;
 import com.zoomulus.speakeasy.sdp.types.SDPOrigin;
@@ -23,8 +29,10 @@ import com.zoomulus.speakeasy.sdp.types.SDPTimePeriod;
 @Accessors(fluent=true)
 public class SDPMessage implements Message
 {
-    final String contentType="application/sdp";
-    final String version="0";
+    public static final String VERSION = "0";
+    
+    final MediaType contentType = MediaType.create("application", "sdp");
+    final String version;
     final SDPOrigin origin;
     final String sessionName;
     final Optional<String> sessionInformation;
@@ -42,9 +50,15 @@ public class SDPMessage implements Message
         return null;
     }
 
-    private SDPMessage()
+    private SDPMessage(final String version,
+            final SDPOrigin origin
+            ) throws SDPMessageException
     {
-        origin = new SDPOrigin();
+        if (! VERSION.equals(version)) {
+            throw new SDPMessageException(String.format("Invalid SDP version \"%s\"", version));
+        }
+        this.version = version;
+        this.origin = origin;
         sessionName = new String(" ");
         sessionInformation = Optional.<String> empty();
         uri = Optional.<URI> empty();
@@ -54,6 +68,57 @@ public class SDPMessage implements Message
         bandwidth = Optional.<SDPBandwidth> empty();
         timing = new SDPTimePeriod();
     }
+    
+    private static final String getNextExpectedToken()
+    {
+        return getNextExpectedToken(null);
+    }
+    
+    private static final String getNextExpectedToken(final String currentToken)
+    {
+        if (Strings.isNullOrEmpty(currentToken)) { return Tokens.VERSION_TOKEN; }
+        switch (currentToken) {
+            case Tokens.VERSION_TOKEN:
+                return Tokens.ORIGIN_TOKEN;
+            default:
+                return Tokens.NO_TOKEN;
+        }
+    }
+    
+    public static SDPMessage from(final InputStream in) throws SDPMessageException, IOException
+    {
+        SDPMessageBuilder sdpBuilder = builder();
+        String expectedToken = getNextExpectedToken();
+        StringBuilder value;
+        int c;
+        while (-1 != (c = in.read()))
+        {
+            if (c != expectedToken.charAt(0))
+            {
+                throw new SDPParseException(String.format("SDP parse failure - expected %s but got %c", expectedToken, (char)c));
+            }
+            if ('=' != in.read())
+            {
+                throw new SDPParseException(String.format("SDP parse failure - token %c must be followed by '='", (char)c));
+            }
+            value = new StringBuilder();
+            c = in.read();
+            while (-1 != c && '\n' != c)
+            {
+                value.append((char)c);
+            }
+            
+            switch (expectedToken)
+            {
+                case Tokens.VERSION_TOKEN:
+                    sdpBuilder = sdpBuilder.version(value.toString());
+            }
+            
+            if (-1 == c) break;
+            expectedToken = getNextExpectedToken(expectedToken);
+        }
+        return sdpBuilder.build();
+    }
 
     public static SDPMessageBuilder builder()
     {
@@ -62,9 +127,31 @@ public class SDPMessage implements Message
 
     public static class SDPMessageBuilder
     {
-        public SDPMessage build()
+        String version = VERSION;
+        SDPOrigin origin = new SDPOrigin();
+        
+        SDPMessageBuilder version(final String version)
         {
-            return new SDPMessage();
+            this.version = version;
+            return this;
         }
+        
+        public SDPMessageBuilder origin(final SDPOrigin origin) {
+            this.origin = origin;
+            return this;
+        }
+        
+        public SDPMessage build() throws SDPMessageException
+        {
+            return new SDPMessage(version, origin);
+        }
+    }
+    
+    public static class Tokens
+    {
+        static final String NO_TOKEN = "";
+        
+        public static final String VERSION_TOKEN = "v";
+        public static final String ORIGIN_TOKEN = "o";
     }
 }
