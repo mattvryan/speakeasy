@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import lombok.Value;
 import lombok.experimental.Accessors;
 
+import com.google.common.net.MediaType;
 import com.zoomulus.speakeasy.core.message.Message;
 
 @Value
@@ -12,7 +13,7 @@ import com.zoomulus.speakeasy.core.message.Message;
 public class TestMessage implements Message
 {
     final ByteBuffer buffer;
-    final String contentType="text/plain";
+    final MediaType contentType = MediaType.PLAIN_TEXT_UTF_8;
     final int type;
     
     public TestMessage(final String contents, final int type)
