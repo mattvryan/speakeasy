@@ -13,15 +13,19 @@
   <description>SpeakEasy SDP parser</description>
   
   <dependencies>
+
     <dependency>
       <groupId>com.zoomulus</groupId>
       <artifactId>speakeasy-core</artifactId>
       <version>${project.version}</version>
     </dependency>
-	<dependency>
-		<groupId>com.googlecode.libphonenumber</groupId>
-		<artifactId>libphonenumber</artifactId>
-		<version>4.3</version>
-	</dependency>
+
+    <dependency>
+      <groupId>com.googlecode.libphonenumber</groupId>
+      <artifactId>libphonenumber</artifactId>
+      <version>4.3</version>
+    </dependency>
+
   </dependencies>
 </project>
+
