@@ -1,7 +1,6 @@
 package com.zoomulus.speakeasy.sdp.messages;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Optional;
@@ -85,39 +84,46 @@ public class SDPMessage implements Message
         }
     }
     
-    public static SDPMessage from(final InputStream in) throws SDPMessageException, IOException
+    public static SDPMessage from(final ByteBuffer in) throws SDPMessageException, IOException
     {
         SDPMessageBuilder sdpBuilder = builder();
         String expectedToken = getNextExpectedToken();
-        StringBuilder value;
-        int c;
-        while (-1 != (c = in.read()))
+        String value;
+        
+        while (in.hasRemaining())
         {
+            char c = in.getChar();
             if (c != expectedToken.charAt(0))
             {
                 throw new SDPParseException(String.format("SDP parse failure - expected %s but got %c", expectedToken, (char)c));
             }
-            if ('=' != in.read())
+            if ('=' != in.getChar())
             {
                 throw new SDPParseException(String.format("SDP parse failure - token %c must be followed by '='", (char)c));
             }
-            value = new StringBuilder();
-            c = in.read();
-            while (-1 != c && '\n' != c)
-            {
-                value.append((char)c);
-            }
+            value = nextLine(in);
             
             switch (expectedToken)
             {
                 case Tokens.VERSION_TOKEN:
-                    sdpBuilder = sdpBuilder.version(value.toString());
+                    sdpBuilder = sdpBuilder.version(value);
             }
             
-            if (-1 == c) break;
             expectedToken = getNextExpectedToken(expectedToken);
         }
         return sdpBuilder.build();
+    }
+    
+    static String nextLine(final ByteBuffer in)
+    {
+        final StringBuilder result = new StringBuilder();
+        while (in.hasRemaining())
+        {
+            char c = in.getChar();
+            if ('\n' == c) break;
+            result.append(c);
+        }
+        return result.toString();
     }
 
     public static SDPMessageBuilder builder()
@@ -128,7 +134,7 @@ public class SDPMessage implements Message
     public static class SDPMessageBuilder
     {
         String version = VERSION;
-        SDPOrigin origin = new SDPOrigin();
+        SDPOrigin origin = null;
         
         SDPMessageBuilder version(final String version)
         {
@@ -143,6 +149,7 @@ public class SDPMessage implements Message
         
         public SDPMessage build() throws SDPMessageException
         {
+            if (null == origin) origin = new SDPOrigin();
             return new SDPMessage(version, origin);
         }
     }

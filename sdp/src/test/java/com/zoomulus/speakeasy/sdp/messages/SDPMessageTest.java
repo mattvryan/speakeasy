@@ -4,11 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.Map;
 
 import org.junit.After;
@@ -18,7 +17,6 @@ import org.junit.Test;
 import com.google.common.collect.Maps;
 import com.google.common.net.MediaType;
 import com.zoomulus.speakeasy.sdp.messages.exceptions.SDPMessageException;
-import com.zoomulus.speakeasy.sdp.messages.exceptions.SDPParseException;
 import com.zoomulus.speakeasy.sdp.types.SDPOrigin;
 
 public class SDPMessageTest
@@ -31,7 +29,7 @@ public class SDPMessageTest
     public void setup() throws UnknownHostException, SDPMessageException
     {
         defaultMessage = SDPMessage.builder()
-                .origin(new SDPOrigin(Inet4Address.getLocalHost()))
+                .origin(new SDPOrigin(Inet4Address.getLoopbackAddress()))
                 .build();
     }
     
@@ -41,16 +39,11 @@ public class SDPMessageTest
         defaultMessage = null;
     }
     
-    private String buildSimpleSdp(final Map<String, String> sdpValues)
+    private ByteBuffer buildSimpleSdp(final Map<String, String> sdpValues)
     {
         final StringBuilder builder = new StringBuilder();
         builder.append(String.format("%s=%s\n", "v", sdpValues.getOrDefault("v", SDPMessage.VERSION)));
-        return builder.toString();
-    }
-    
-    private InputStream buildSimpleSdpIS(final Map<String, String> sdpValues)
-    {
-        return new ByteArrayInputStream(buildSimpleSdp(sdpValues).getBytes());
+        return ByteBuffer.wrap(builder.toString().getBytes());
     }
     
     @Test
@@ -79,7 +72,7 @@ public class SDPMessageTest
         {
             final Map<String, String> sdpValues = Maps.newHashMap();
             sdpValues.put(SDPMessage.Tokens.VERSION_TOKEN, "");
-            SDPMessage.from(buildSimpleSdpIS(sdpValues));
+            SDPMessage.from(buildSimpleSdp(sdpValues));
             fail();
         }
         catch (SDPMessageException e) { }
