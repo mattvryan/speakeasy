@@ -1,6 +1,7 @@
 package com.zoomulus.speakeasy.sdp.types;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeTrue;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -18,14 +19,20 @@ import com.zoomulus.speakeasy.sdp.types.SDPConnectionData;
 
 public class TestSDPConnectionData
 {
-    Optional<InetAddress> local4 = LocalInetAddress.guess(AddrType.IP4);
-    Optional<InetAddress> local6 = LocalInetAddress.guess(AddrType.IP6);
+    Optional<InetAddress> local4;
+    Optional<InetAddress> local6;
     InetAddress ip4Multi = null;
     InetAddress ip6Multi = null;
     
     @Before
     public void setup()
     {
+        // If we don't have a working network, skip these tests
+        assumeTrue(LocalInetAddress.guess(AddrType.IP4).isPresent());
+        
+        local4 = LocalInetAddress.guess(AddrType.IP4);
+        local6 = LocalInetAddress.guess(AddrType.IP6);
+        
         try
         {
             ip4Multi = Inet4Address.getByName("224.0.0.0");

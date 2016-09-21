@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -11,14 +12,12 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Optional;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.zoomulus.speakeasy.core.types.AddrType;
 import com.zoomulus.speakeasy.core.types.LocalInetAddress;
 import com.zoomulus.speakeasy.core.types.NetType;
-import com.zoomulus.speakeasy.sdp.types.SDPNumericId;
-import com.zoomulus.speakeasy.sdp.types.SDPOrigin;
-import com.zoomulus.speakeasy.sdp.types.SDPUsername;
 
 public class TestSDPOrigin
 {
@@ -26,8 +25,8 @@ public class TestSDPOrigin
     SDPUsername bobUsername = new SDPUsername("bob");
     SDPNumericId sessId = new SDPNumericId();
     SDPNumericId sessVersion = new SDPNumericId();
-    InetAddress localIP4Addr = LocalInetAddress.guess(AddrType.IP4).get();
-    InetAddress localIP6Addr = LocalInetAddress.guess(AddrType.IP6).get();
+    InetAddress localIP4Addr;
+    InetAddress localIP6Addr;
     
     private void validate(final SDPOrigin o, final SDPUsername username, final AddrType addrType, final InetAddress address)
     {
@@ -46,6 +45,16 @@ public class TestSDPOrigin
         {
             assertTrue(o.unicastAddress() instanceof Inet6Address);
         }
+    }
+    
+    @Before
+    public void setup()
+    {
+        // If we don't have a working network, skip these tests
+        assumeTrue(LocalInetAddress.guess(AddrType.IP4).isPresent());
+        
+        localIP4Addr = LocalInetAddress.guess(AddrType.IP4).get();
+        localIP6Addr = LocalInetAddress.guess(AddrType.IP6).get();
     }
     
     @Test
