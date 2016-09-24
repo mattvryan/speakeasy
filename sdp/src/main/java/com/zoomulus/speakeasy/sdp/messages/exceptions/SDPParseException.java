@@ -8,4 +8,9 @@ public class SDPParseException extends SDPMessageException
     {
         super(msg);
     }
+    
+    public SDPParseException(final String msg, final Exception e)
+    {
+        super(msg, e);
+    }
 }

@@ -13,6 +13,7 @@ import lombok.experimental.Accessors;
 import com.zoomulus.speakeasy.core.types.AddrType;
 import com.zoomulus.speakeasy.core.types.LocalInetAddress;
 import com.zoomulus.speakeasy.core.types.NetType;
+import com.zoomulus.speakeasy.sdp.messages.exceptions.SDPParseException;
 
 @Value
 @Accessors(fluent=true)
@@ -358,6 +359,39 @@ public class SDPOrigin
                 sessionVersion,
                 ((unicastAddress instanceof Inet4Address) ? AddrType.IP4 : AddrType.IP6),
                 unicastAddress);        
+    }
+    
+    public static SDPOrigin parse(final String  s) throws SDPParseException
+    {
+        try
+        {
+            String[] params = s.split(" ");
+            final SDPUsername username = params[0].equals("-") ? new SDPUsername() : new SDPUsername(params[0]);
+            final AddrType addrType = AddrType.IP4.name().equals(params[4]) ? AddrType.IP4 :
+                (AddrType.IP6.name().equals(params[4]) ? AddrType.IP6 : null);
+            if (null == addrType) {
+                throw new SDPParseException(String.format("Invalid origin address type '%s'", params[4]));
+            }
+            InetAddress address = null;
+            try
+            {
+                address = InetAddress.getByName(params[5]);
+            }
+            catch (UnknownHostException e)
+            {
+                throw new SDPParseException(String.format("Invalid origin address '%s'", params[5]), e);
+            }
+            
+            return new SDPOrigin(username,
+                    new SDPNumericId(params[1]),
+                    new SDPNumericId(params[2]),
+                    addrType,
+                    address);
+        }
+        catch (ArrayIndexOutOfBoundsException e)
+        {
+            throw new SDPParseException(String.format("Invalid origin specification '%s'", s), e);
+        }
     }
 
     private SDPOrigin(@NonNull final SDPUsername username,

@@ -1,6 +1,5 @@
 package com.zoomulus.speakeasy.sdp.messages;
 
-import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Optional;
@@ -84,7 +83,7 @@ public class SDPMessage implements Message
         }
     }
     
-    public static SDPMessage from(final ByteBuffer in) throws SDPMessageException, IOException
+    public static SDPMessage parse(final ByteBuffer in) throws SDPMessageException
     {
         SDPMessageBuilder sdpBuilder = builder();
         String expectedToken = getNextExpectedToken();
@@ -92,12 +91,12 @@ public class SDPMessage implements Message
         
         while (in.hasRemaining())
         {
-            char c = in.getChar();
+            char c = (char) in.get();
             if (c != expectedToken.charAt(0))
             {
                 throw new SDPParseException(String.format("SDP parse failure - expected %s but got %c", expectedToken, (char)c));
             }
-            if ('=' != in.getChar())
+            if ('=' != (char) in.get())
             {
                 throw new SDPParseException(String.format("SDP parse failure - token %c must be followed by '='", (char)c));
             }
@@ -107,6 +106,9 @@ public class SDPMessage implements Message
             {
                 case Tokens.VERSION_TOKEN:
                     sdpBuilder = sdpBuilder.version(value);
+                    break;
+                case Tokens.ORIGIN_TOKEN:
+                    sdpBuilder = sdpBuilder.origin(SDPOrigin.parse(value));
             }
             
             expectedToken = getNextExpectedToken(expectedToken);
@@ -119,7 +121,7 @@ public class SDPMessage implements Message
         final StringBuilder result = new StringBuilder();
         while (in.hasRemaining())
         {
-            char c = in.getChar();
+            char c = (char) in.get();
             if ('\n' == c) break;
             result.append(c);
         }
