@@ -2,12 +2,14 @@ package com.zoomulus.speakeasy.sdp.messages;
 
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Optional;
 
 import lombok.Value;
 import lombok.experimental.Accessors;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.net.MediaType;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.zoomulus.speakeasy.core.message.Message;
@@ -87,7 +89,7 @@ public class SDPMessage implements Message
     {
         SDPMessageBuilder sdpBuilder = builder();
         String expectedToken = getNextExpectedToken();
-        String value;
+        List<String> value;
         
         while (in.hasRemaining())
         {
@@ -105,7 +107,7 @@ public class SDPMessage implements Message
             switch (expectedToken)
             {
                 case Tokens.VERSION_TOKEN:
-                    sdpBuilder = sdpBuilder.version(value);
+                    sdpBuilder = sdpBuilder.version(value.get(0));
                     break;
                 case Tokens.ORIGIN_TOKEN:
                     sdpBuilder = sdpBuilder.origin(SDPOrigin.parse(value));
@@ -116,16 +118,22 @@ public class SDPMessage implements Message
         return sdpBuilder.build();
     }
     
-    static String nextLine(final ByteBuffer in)
+    static List<String> nextLine(final ByteBuffer in)
     {
-        final StringBuilder result = new StringBuilder();
+        final List<String> line = Lists.newArrayList();
+        StringBuilder token = new StringBuilder();
         while (in.hasRemaining())
         {
             char c = (char) in.get();
-            if ('\n' == c) break;
-            result.append(c);
+            if (('\n' == c || ' ' == c) && token.length() > 0)
+            {
+                line.add(token.toString());
+                if ('\n' == c) break;
+                token = new StringBuilder();
+            }
+            else token.append(c);
         }
-        return result.toString();
+        return line;
     }
 
     public static SDPMessageBuilder builder()

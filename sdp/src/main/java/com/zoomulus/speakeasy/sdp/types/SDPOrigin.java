@@ -4,12 +4,15 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Optional;
 
 import lombok.NonNull;
 import lombok.Value;
 import lombok.experimental.Accessors;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import com.zoomulus.speakeasy.core.types.AddrType;
 import com.zoomulus.speakeasy.core.types.LocalInetAddress;
 import com.zoomulus.speakeasy.core.types.NetType;
@@ -361,36 +364,40 @@ public class SDPOrigin
                 unicastAddress);        
     }
     
-    public static SDPOrigin parse(final String  s) throws SDPParseException
+    public static SDPOrigin parse(final String s) throws SDPParseException
+    {
+        return parse(Lists.newArrayList(s.split(" ")));
+    }
+    
+    public static SDPOrigin parse(final List<String> params) throws SDPParseException
     {
         try
         {
-            String[] params = s.split(" ");
-            final SDPUsername username = params[0].equals("-") ? new SDPUsername() : new SDPUsername(params[0]);
-            final AddrType addrType = AddrType.IP4.name().equals(params[4]) ? AddrType.IP4 :
-                (AddrType.IP6.name().equals(params[4]) ? AddrType.IP6 : null);
+            final SDPUsername username = params.get(0).equals("-") ? new SDPUsername() : new SDPUsername(params.get(0));
+            final AddrType addrType = AddrType.IP4.name().equals(params.get(4)) ? AddrType.IP4 :
+                (AddrType.IP6.name().equals(params.get(4)) ? AddrType.IP6 : null);
             if (null == addrType) {
-                throw new SDPParseException(String.format("Invalid origin address type '%s'", params[4]));
+                throw new SDPParseException(String.format("Invalid origin address type '%s'", params.get(4)));
             }
             InetAddress address = null;
             try
             {
-                address = InetAddress.getByName(params[5]);
+                address = InetAddress.getByName(params.get(5));
             }
             catch (UnknownHostException e)
             {
-                throw new SDPParseException(String.format("Invalid origin address '%s'", params[5]), e);
+                throw new SDPParseException(String.format("Invalid origin address '%s'", params.get(5)), e);
             }
             
             return new SDPOrigin(username,
-                    new SDPNumericId(params[1]),
-                    new SDPNumericId(params[2]),
+                    new SDPNumericId(params.get(1)),
+                    new SDPNumericId(params.get(2)),
                     addrType,
                     address);
         }
         catch (ArrayIndexOutOfBoundsException e)
         {
-            throw new SDPParseException(String.format("Invalid origin specification '%s'", s), e);
+            throw new SDPParseException(String.format("Invalid origin specification '%s'", Joiner.on(' ').join(params)), e);
         }
     }
 
