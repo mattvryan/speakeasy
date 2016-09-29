@@ -10,7 +10,7 @@ import org.junit.Test;
 import com.zoomulus.speakeasy.sdp.types.SDPBandwidth;
 import com.zoomulus.speakeasy.sdp.types.SDPBandwidth.SDPBandwidthType;
 
-public class TestSDPBandwidth
+public class SDPBandwidthTest
 {
 
     @Test

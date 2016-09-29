@@ -17,7 +17,7 @@ import com.zoomulus.speakeasy.core.types.LocalInetAddress;
 import com.zoomulus.speakeasy.core.types.NetType;
 import com.zoomulus.speakeasy.sdp.types.SDPConnectionData;
 
-public class TestSDPConnectionData
+public class SDPConnectionDataTest
 {
     Optional<InetAddress> local4;
     Optional<InetAddress> local6;

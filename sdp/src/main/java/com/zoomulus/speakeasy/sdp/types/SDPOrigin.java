@@ -5,7 +5,6 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
-import java.util.Optional;
 
 import lombok.NonNull;
 import lombok.Value;
@@ -366,7 +365,7 @@ public class SDPOrigin
     
     public static SDPOrigin parse(final String s) throws SDPParseException
     {
-        return parse(Lists.newArrayList(s.split(" ")));
+        return parse(Lists.newArrayList(s.trim().split(" +")));
     }
     
     public static SDPOrigin parse(final List<String> params) throws SDPParseException
@@ -377,7 +376,7 @@ public class SDPOrigin
             final AddrType addrType = AddrType.IP4.name().equals(params.get(4)) ? AddrType.IP4 :
                 (AddrType.IP6.name().equals(params.get(4)) ? AddrType.IP6 : null);
             if (null == addrType) {
-                throw new SDPParseException(String.format("Invalid origin address type '%s'", params.get(4)));
+                throw new IllegalArgumentException(String.format("Invalid origin address type '%s'", params.get(4)));
             }
             InetAddress address = null;
             try
@@ -389,6 +388,16 @@ public class SDPOrigin
                 throw new SDPParseException(String.format("Invalid origin address '%s'", params.get(5)), e);
             }
             
+            if ((AddrType.IP4 == addrType && address instanceof Inet6Address) ||
+                    (AddrType.IP6 == addrType && address instanceof Inet4Address))
+            {
+                throw new IllegalArgumentException(String.format("Address %s is not of type %s", params.get(5), params.get(4)));
+            }
+            
+            if (! "IN".equals(params.get(3))) {
+                throw new IllegalArgumentException(String.format("Invalid net type '%s'", params.get(3)));
+            }
+            
             return new SDPOrigin(username,
                     new SDPNumericId(params.get(1)),
                     new SDPNumericId(params.get(2)),
@@ -398,6 +407,14 @@ public class SDPOrigin
         catch (ArrayIndexOutOfBoundsException e)
         {
             throw new SDPParseException(String.format("Invalid origin specification '%s'", Joiner.on(' ').join(params)), e);
+        }
+        catch (NumberFormatException e)
+        {
+            throw new SDPParseException(e);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new SDPParseException(e);
         }
     }
 
@@ -424,107 +441,5 @@ public class SDPOrigin
                 netType,
                 addrType,
                 unicastAddress.getCanonicalHostName());
-    }
-    
-    public static Optional<SDPOrigin> fromString(@NonNull final String stringRep)
-    {
-        String[] parts = stringRep.trim().split(" +");
-        if (parts.length >= 6)
-        {
-            SDPUsername username = null;
-            SDPNumericId sessId = null;
-            SDPNumericId sessVersion = null;
-            NetType netType = null;
-            AddrType addrType = null;
-            InetAddress unicastAddress = null;
-            
-            int ctr = 1;
-            
-            for (String part : parts)
-            {
-                String tPart = part.trim();
-                if (0 != tPart.length())
-                {
-                    switch (ctr)
-                    {
-                        case 1:
-                            username = new SDPUsername(tPart);
-                            break;
-                        case 2:
-                            try
-                            {
-                                sessId = new SDPNumericId(tPart);
-                            }
-                            catch (NumberFormatException e)
-                            {
-                                e.printStackTrace();
-                            }
-                            break;
-                        case 3:
-                            try
-                            {
-                                sessVersion = new SDPNumericId(tPart);
-                            }
-                            catch (NumberFormatException e)
-                            {
-                                e.printStackTrace();
-                            }
-                            break;
-                        case 4:
-                            try
-                            {
-                                netType = NetType.valueOf(tPart);
-                            }
-                            catch (IllegalArgumentException e)
-                            {
-                                e.printStackTrace();
-                            }
-                            break;
-                        case 5:
-                            try
-                            {
-                                addrType = AddrType.valueOf(tPart);
-                            }
-                            catch (IllegalArgumentException e)
-                            {
-                                e.printStackTrace();
-                            }
-                            break;
-                        case 6:
-                            try
-                            {
-                                unicastAddress = InetAddress.getByName(tPart);
-                            }
-                            catch (UnknownHostException e)
-                            {
-                                e.printStackTrace();
-                            }
-                            break;
-                    }
-                }
-                if (++ctr > 6) break;
-            }
-            if (NetType.IN == netType)
-            {
-                if (((AddrType.IP4 == addrType) && (unicastAddress instanceof Inet4Address)) ||
-                        ((AddrType.IP6 == addrType) && (unicastAddress instanceof Inet6Address)))
-                {
-                    try
-                    {
-                        return Optional.of(new SDPOrigin(username, sessId, sessVersion, addrType, unicastAddress));
-                    }
-                    catch (NullPointerException e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-                else
-                {
-                    new IllegalArgumentException("Unicast address type does not match provided AddrType")
-                    .printStackTrace();
-                }
-            }
-        }
-        return Optional.<SDPOrigin> empty();
     }
 }

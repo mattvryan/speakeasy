@@ -1,16 +1,15 @@
 package com.zoomulus.speakeasy.sdp.types;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,8 +17,9 @@ import org.junit.Test;
 import com.zoomulus.speakeasy.core.types.AddrType;
 import com.zoomulus.speakeasy.core.types.LocalInetAddress;
 import com.zoomulus.speakeasy.core.types.NetType;
+import com.zoomulus.speakeasy.sdp.messages.exceptions.SDPParseException;
 
-public class TestSDPOrigin
+public class SDPOriginTest
 {
     SDPUsername emptyUsername = new SDPUsername();
     SDPUsername bobUsername = new SDPUsername("bob");
@@ -67,7 +67,7 @@ public class TestSDPOrigin
                 NetType.IN,
                 AddrType.IP4,
                 localIP4Addr.getCanonicalHostName());
-        assertEquals(expected, new SDPOrigin().toString());
+        assertEquals(expected, new SDPOrigin(sessId, sessVersion).toString());
     }
     
     @Test
@@ -84,13 +84,12 @@ public class TestSDPOrigin
     }
     
     @Test
-    public void testParseDefaultString() throws UnknownHostException
+    public void testParseDefaultString() throws UnknownHostException, SDPParseException
     {
-        final Optional<SDPOrigin> origin = SDPOrigin.fromString("- 12345 23456 IN IP4 100.101.102.103");
-        assertTrue(origin.isPresent());
-        assertEquals(new SDPNumericId("12345"), origin.get().sessId());
-        assertEquals(new SDPNumericId("23456"), origin.get().sessVersion());
-        validate(origin.get(),
+        final SDPOrigin origin = SDPOrigin.parse("- 12345 23456 IN IP4 100.101.102.103");
+        assertEquals(new SDPNumericId("12345"), origin.sessId());
+        assertEquals(new SDPNumericId("23456"), origin.sessVersion());
+        validate(origin,
                 emptyUsername,
                 AddrType.IP4,
                 Inet4Address.getByName("100.101.102.103"));
@@ -98,58 +97,62 @@ public class TestSDPOrigin
     }
     
     @Test
-    public void testParseCustomString() throws UnknownHostException
+    public void testParseCustomString() throws SDPParseException, UnknownHostException
     {
-        final Optional<SDPOrigin> origin = SDPOrigin.fromString("bob 12345 23456 IN IP4 100.101.102.103");
-        assertTrue(origin.isPresent());
-        assertEquals(new SDPNumericId("12345"), origin.get().sessId());
-        assertEquals(new SDPNumericId("23456"), origin.get().sessVersion());
-        validate(origin.get(),
+        final SDPOrigin origin = SDPOrigin.parse("bob 12345 23456 IN IP4 100.101.102.103");
+        assertEquals(new SDPNumericId("12345"), origin.sessId());
+        assertEquals(new SDPNumericId("23456"), origin.sessVersion());
+        validate(origin,
                 bobUsername,
                 AddrType.IP4,
                 Inet4Address.getByName("100.101.102.103"));
     }
     
     @Test
-    public void testParseIP6Addr() throws UnknownHostException
+    public void testParseIP6Addr() throws SDPParseException, UnknownHostException
     {
-        final Optional<SDPOrigin> origin = SDPOrigin.fromString("bob 12345 23456 IN IP6 fe80::3e07:54ff:fe46:8e6a");
-        assertTrue(origin.isPresent());
-        assertEquals(new SDPNumericId("12345"), origin.get().sessId());
-        assertEquals(new SDPNumericId("23456"), origin.get().sessVersion());
-        validate(origin.get(),
+        final SDPOrigin origin = SDPOrigin.parse("bob 12345 23456 IN IP6 fe80::3e07:54ff:fe46:8e6a");
+        assertEquals(new SDPNumericId("12345"), origin.sessId());
+        assertEquals(new SDPNumericId("23456"), origin.sessVersion());
+        validate(origin,
                 bobUsername,
                 AddrType.IP6,
                 Inet6Address.getByName("fe80::3e07:54ff:fe46:8e6a"));
     }
     
     @Test
-    public void testOriginWithDNSWorks() throws UnknownHostException
+    public void testOriginWithDNSWorks() throws SDPParseException, UnknownHostException
     {
-        final Optional<SDPOrigin> origin = SDPOrigin.fromString("bob 12345 23456 IN IP4 www.jive.com");
-        assertTrue(origin.isPresent());
-        assertEquals(new SDPNumericId("12345"), origin.get().sessId());
-        assertEquals(new SDPNumericId("23456"), origin.get().sessVersion());
-        validate(origin.get(),
+        final SDPOrigin origin = SDPOrigin.parse("bob 12345 23456 IN IP4 www.zoomulus.com");
+        assertEquals(new SDPNumericId("12345"), origin.sessId());
+        assertEquals(new SDPNumericId("23456"), origin.sessVersion());
+        validate(origin,
                 bobUsername,
                 AddrType.IP4,
-                Inet6Address.getByName("www.jive.com"));   
+                Inet6Address.getByName("www.zoomulus.com"));   
     }
     
     @Test
     public void testMismatchBetweenAddrTypeAndUnicastAddressFails()
     {
-        assertFalse(SDPOrigin.fromString("bob 12345 23456 IN IP6 100.101.102.103").isPresent());
+        try
+        {
+            SDPOrigin.parse("bob 12345 23456 IN IP6 100.101.102.103");
+            fail();
+        }
+        catch (SDPParseException e)
+        {
+            assertTrue(e.getCause() instanceof IllegalArgumentException);
+        } 
     }
     
     @Test
-    public void testParseIrregularlyFormattedString() throws UnknownHostException
+    public void testParseIrregularlyFormattedString() throws SDPParseException, UnknownHostException
     {
-        final Optional<SDPOrigin> origin = SDPOrigin.fromString(" bob  12345 23456      IN   IP4  100.101.102.103             ");
-        assertTrue(origin.isPresent());
-        assertEquals(new SDPNumericId("12345"), origin.get().sessId());
-        assertEquals(new SDPNumericId("23456"), origin.get().sessVersion());
-        validate(origin.get(),
+        final SDPOrigin origin = SDPOrigin.parse(" bob  12345 23456      IN   IP4  100.101.102.103             ");
+        assertEquals(new SDPNumericId("12345"), origin.sessId());
+        assertEquals(new SDPNumericId("23456"), origin.sessVersion());
+        validate(origin,
                 bobUsername,
                 AddrType.IP4,
                 Inet4Address.getByName("100.101.102.103"));        
@@ -158,31 +161,71 @@ public class TestSDPOrigin
     @Test
     public void testInvalidSessionIdThrowsNumberFormatException()
     {
-        assertFalse(SDPOrigin.fromString("bob 12e45 23456 IN IP4 100.101.102.103").isPresent());
+        try
+        {
+            SDPOrigin.parse("bob 12e45 23456 IN IP4 100.101.102.103");
+            fail();
+        }
+        catch (SDPParseException e)
+        {
+            assertTrue(e.getCause() instanceof NumberFormatException);
+        }
     }
     
     @Test
     public void testInvalidSessionVersionThrowsNumberFormatException()
     {
-        assertFalse(SDPOrigin.fromString("bob 12345 23f56 IN IP4 100.101.102.103").isPresent());
+        try
+        {
+            SDPOrigin.parse("bob 12345 23f56 IN IP4 100.101.102.103");
+            fail();
+        }
+        catch (SDPParseException e)
+        {
+            assertTrue(e.getCause() instanceof NumberFormatException);
+        }
     }
     
     @Test
     public void testInvalidNetTypeThrowsIllegalArgumentException()
     {
-        assertFalse(SDPOrigin.fromString("bob 12345 23456 OUT IP4 100.101.102.103").isPresent());
+        try
+        {
+            SDPOrigin.parse("bob 12345 23456 OUT IP4 100.101.102.103");
+            fail();
+        }
+        catch (SDPParseException e)
+        {
+            assertTrue(e.getCause() instanceof IllegalArgumentException);
+        }
     }
     
     @Test
     public void testInvalidAddrTypeThrowsIllegalArgumentException()
     {
-        assertFalse(SDPOrigin.fromString("bob 12345 23456 IN IP5 100.101.102.103").isPresent());
+        try
+        {
+            SDPOrigin.parse("bob 12345 23456 IN IP5 100.101.102.103");
+            fail();
+        }
+        catch (SDPParseException e)
+        {
+            assertTrue(e.getCause() instanceof IllegalArgumentException);
+        }
     }
     
     @Test
     public void testInvalidInetAddrThrowsUnknownHostException()
     {
-        assertFalse(SDPOrigin.fromString("bob 12345 23456 IN IP6 100.200.300.400").isPresent());
+        try
+        {
+            SDPOrigin.parse("bob 12345 23456 IN IP6 100.200.300.400");
+            fail();
+        }
+        catch (SDPParseException e)
+        {
+            assertTrue(e.getCause() instanceof UnknownHostException);
+        }
     }
 
     @Test

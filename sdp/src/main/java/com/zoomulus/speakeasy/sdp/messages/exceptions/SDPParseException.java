@@ -13,4 +13,9 @@ public class SDPParseException extends SDPMessageException
     {
         super(msg, e);
     }
+    
+    public SDPParseException(final Exception e)
+    {
+        super(e);
+    }
 }

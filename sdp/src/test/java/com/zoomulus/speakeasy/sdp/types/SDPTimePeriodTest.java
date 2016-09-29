@@ -7,7 +7,7 @@ import static org.junit.Assert.fail;
 import org.joda.time.Instant;
 import org.junit.Test;
 
-public class TestSDPTimePeriod
+public class SDPTimePeriodTest
 {
     private final long start = 12345 + SDPTimePeriod.UNIX_TO_NTP;
     private final long stop = 23456 + SDPTimePeriod.UNIX_TO_NTP;
