@@ -100,7 +100,7 @@ public class SDPMessageTest
     @Test
     public void testParseInvalidOriginFails()
     {
-        for (final String s : Lists.newArrayList("", null, "invalid"))
+        for (final String s : Lists.newArrayList("", null, "invalid", "- 12345 54321 OUT IP4 127.0.0.1", "- 12345 54321 IN IP7 127.0.0.1"))
         {
             try
             {
