@@ -107,10 +107,11 @@ public class SDPMessage implements Message
             switch (expectedToken)
             {
                 case Tokens.VERSION_TOKEN:
-                    sdpBuilder = sdpBuilder.version(value.get(0));
+                    sdpBuilder = sdpBuilder.version(value.size() > 0 ? value.get(0) : "");
                     break;
                 case Tokens.ORIGIN_TOKEN:
                     sdpBuilder = sdpBuilder.origin(SDPOrigin.parse(value));
+                    break;
             }
             
             expectedToken = getNextExpectedToken(expectedToken);
@@ -130,6 +131,11 @@ public class SDPMessage implements Message
                 line.add(token.toString());
                 if ('\n' == c) break;
                 token = new StringBuilder();
+            }
+            else if ('\n' == c) 
+            {
+                token.append("");
+                break;
             }
             else token.append(c);
         }

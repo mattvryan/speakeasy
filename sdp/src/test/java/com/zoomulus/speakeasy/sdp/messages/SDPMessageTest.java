@@ -76,7 +76,7 @@ public class SDPMessageTest
     @Test
     public void testParseInvalidVersionFails()
     {
-        for (final String s : Lists.newArrayList("", null, "1", "notaversion"))
+        for (final String s : Lists.newArrayList("", null, "1", "invalid"))
         {
             try
             {
@@ -94,6 +94,30 @@ public class SDPMessageTest
     {
         final Map<String, String> sdpValues = Maps.newHashMap();
         sdpValues.put(SDPMessage.Tokens.VERSION_TOKEN, "0");
+        SDPMessage.parse(buildSimpleSdp(sdpValues));
+    }
+    
+    @Test
+    public void testParseInvalidOriginFails()
+    {
+        for (final String s : Lists.newArrayList("", null, "invalid"))
+        {
+            try
+            {
+                final Map<String, String> sdpValues = Maps.newHashMap();
+                sdpValues.put(SDPMessage.Tokens.ORIGIN_TOKEN, s);
+                SDPMessage.parse(buildSimpleSdp(sdpValues));
+                fail();
+            }
+            catch (SDPMessageException e) { }
+        }
+    }
+    
+    @Test
+    public void testParseValidOrigin() throws SDPMessageException
+    {
+        final Map<String, String> sdpValues = Maps.newHashMap();
+        sdpValues.put(SDPMessage.Tokens.ORIGIN_TOKEN, "- 12345 54321 IN IP4 127.0.0.1");
         SDPMessage.parse(buildSimpleSdp(sdpValues));
     }
 }

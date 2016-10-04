@@ -404,7 +404,7 @@ public class SDPOrigin
                     addrType,
                     address);
         }
-        catch (ArrayIndexOutOfBoundsException e)
+        catch (IndexOutOfBoundsException e)
         {
             throw new SDPParseException(String.format("Invalid origin specification '%s'", Joiner.on(' ').join(params)), e);
         }
